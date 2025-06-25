@@ -8,7 +8,6 @@ export default function DeviceList({ selectedDevice, onSelect }) {
   useEffect(() => {
     getDevices().then(setDevices);
   }, []);
-
   return (
     <div className="card">
       <h3>Devices</h3>

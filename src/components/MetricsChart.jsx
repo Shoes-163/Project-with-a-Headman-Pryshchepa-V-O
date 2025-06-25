@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Chart } from 'primereact/chart';
 import { getMetrics } from '../services/api';
 
-
 const metricLabels = {
   temperature: 'Температура (°C)',
   humidity: 'Вологість (%)',
@@ -12,32 +11,74 @@ const metricLabels = {
   co2: 'CO₂ (ppm)',
   wind_speed: 'Швидкість вітру (м/с)',
   noise_level: 'Рівень шуму (дБ)',
-  battery: 'Заряд батареї (%)'
+  battery: 'Заряд батареї (%)',
 };
 
-export default function MetricsChart({ deviceId }) {
+export default function MetricsChart({ deviceId, dateRange, metricTypes }) {
   const [metricsByType, setMetricsByType] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!deviceId) return;
+    if (!deviceId || !metricTypes?.length) {
+      setMetricsByType({});
+      return;
+    }
 
-    getMetrics({ deviceId }).then((metrics) => {
-      const grouped = {};
+    const fetchMetrics = async () => {
+      setLoading(true);
+      setError(null);
 
-      for (const metric of metrics) {
-        const { type, value, timestamp } = metric;
-        if (!grouped[type]) grouped[type] = { labels: [], data: [] };
+      try {
+        const params = { deviceId };
 
-        grouped[type].labels.push(new Date(timestamp).toLocaleTimeString());
-        grouped[type].data.push(value);
+        if (dateRange?.[0] && dateRange?.[1]) {
+          params.stime = dateRange[0].toISOString().slice(0, -1);
+          params.etime = dateRange[1].toISOString().slice(0, -1);
+        }
+
+        if (metricTypes?.length) {
+          params.types = metricTypes.join(',');
+        }
+
+        const metrics = await getMetrics(params);
+        const grouped = {};
+
+        for (const metric of metrics) {
+          const { type_of_metrics: type, value_of_metrics: value, time } = metric;
+          if (!grouped[type]) {
+            grouped[type] = { labels: [], data: [] };
+          }
+          grouped[type].labels.push(new Date(time).toLocaleString());
+          grouped[type].data.push(parseFloat(value));
+        }
+
+        setMetricsByType(grouped);
+      } catch (err) {
+        setError('Помилка завантаження метрик');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setMetricsByType(grouped);
-    });
-  }, [deviceId]);
+    fetchMetrics();
+  }, [deviceId, dateRange?.[0]?.toISOString(), dateRange?.[1]?.toISOString(), metricTypes?.join()]);
+
+  if (loading) {
+    return <div className="card">Завантаження...</div>;
+  }
+
+  if (error) {
+    return <div className="card">{error}</div>;
+  }
 
   if (!deviceId) {
     return <div className="card">Виберіть пристрій для перегляду метрик</div>;
+  }
+
+  if (!Object.keys(metricsByType).length) {
+    return <div className="card">Немає даних для відображення</div>;
   }
 
   return (
@@ -50,12 +91,14 @@ export default function MetricsChart({ deviceId }) {
               type="line"
               data={{
                 labels,
-                datasets: [{
-                  label: metricLabels[type] || type,
-                  data,
-                  borderColor: '#42A5F5',
-                  fill: false,
-                }],
+                datasets: [
+                  {
+                    label: metricLabels[ type ] || type,
+                    data,
+                    borderColor: '#42A5F5',
+                    fill: false,
+                  },
+                ],
               }}
               options={{
                 responsive: true,
