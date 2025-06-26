@@ -5,11 +5,11 @@ import { getMetrics } from '../services/api';
 const metricLabels = {
   temperature: 'Температура (°C)',
   humidity: 'Вологість (%)',
-  light: 'Освітлення (lx)',
+  illumination: 'Освітлення (lx)',
   pressure: 'Тиск (гПа)',
   air_quality: 'Якість повітря (PM2.5, мкг/м³)',
-  co2: 'CO₂ (ppm)',
-  wind_speed: 'Швидкість вітру (м/с)',
+  carbon_dioxide_level: 'CO₂ (ppm)',
+  wind_velocity: 'Швидкість вітру (м/с)',
   noise_level: 'Рівень шуму (дБ)',
   battery: 'Заряд батареї (%)',
 };
