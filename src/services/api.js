@@ -13,10 +13,16 @@ export const getMetrics = async (params) => {
 };
 
 export const generateMetrics = async () => {
-  await axios.post(`${BASE_URL}/metrics/generate_metrics/`);
+  const res = await axios.post(`${BASE_URL}/metrics/generate_metrics/`);
+  return res.data; 
 };
 
 export const getMetricTypes = async (params) => {
   const res = await axios.get(`${BASE_URL}/metrics/types/`, { params });
+  return res.data;
+};
+
+export const updateDevice = async (id, data) => {
+  const res = await axios.patch(`${BASE_URL}/devices/${id}/`, data);
   return res.data;
 };
