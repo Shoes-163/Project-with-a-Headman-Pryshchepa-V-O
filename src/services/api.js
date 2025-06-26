@@ -13,7 +13,8 @@ export const getMetrics = async (params) => {
 };
 
 export const generateMetrics = async () => {
-  await axios.post(`${BASE_URL}/metrics/generate_metrics/`);
+  const res = await axios.post(`${BASE_URL}/metrics/generate_metrics/`);
+  return res.data; 
 };
 
 export const getMetricTypes = async (params) => {

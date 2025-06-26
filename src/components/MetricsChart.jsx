@@ -46,7 +46,7 @@ export default function MetricsChart({ deviceId, dateRange, metricTypes }) {
         const grouped = {};
 
 for (const metric of metrics) {
-  const { type_of_metrics: type, value_of_metrics: value, time } = metric;
+  const { type: type, value: value, time } = metric;
 
   if (!grouped[type]) {
     grouped[type] = { labels: [], data: [] };
